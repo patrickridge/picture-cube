@@ -11,6 +11,15 @@ const STEPS = [
   { title: "Solve", text: "Usually 20–40 moves, a few at a time, with a picture after each group so a slip is caught straight away." },
 ];
 
+const SOLVED = [
+  { src: "/cube-solved.jpg", label: "Front" },
+  { src: "/cube-solved-orange.jpg", label: "Right" },
+  { src: "/cube-solved-purple.jpg", label: "Back" },
+  { src: "/cube-solved-left.jpg", label: "Left" },
+  { src: "/cube-solved-top.jpg", label: "Top" },
+  { src: "/cube-solved-bottom.jpg", label: "Bottom" },
+];
+
 export default function Home() {
   return (
     <div className="flex min-h-full flex-col">
@@ -44,19 +53,15 @@ export default function Home() {
         <CubeSolver />
 
         <section className="space-y-4 border-t pt-10">
-          <h2 className="text-xl font-semibold">The cube that started it</h2>
-          <p className="max-w-prose text-sm text-muted-foreground">
-            A conference giveaway covered in artwork. Most tiles are pale fragments that could belong to several sides, and with every piece in place the centres were still turned the wrong way. Here it is scrambled, then three of its sides once solved.
-          </p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { src: "/cube-before.jpg", label: "Scrambled" },
-              { src: "/cube-solved.jpg", label: "Solved: front" },
-              { src: "/cube-solved-orange.jpg", label: "Solved: right" },
-              { src: "/cube-solved-purple.jpg", label: "Solved: back" },
-            ].map(({ src, label }) => (
+          <h2 className="text-xl font-semibold">The cube that inspired the idea</h2>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+            <figure className="col-span-3 space-y-1.5 sm:col-span-2 sm:row-span-2">
+              <Image src="/cube-before.jpg" alt="The picture cube, scrambled" width={640} height={640} className="rounded-xl" />
+              <figcaption className="text-center text-sm text-muted-foreground">Scrambled</figcaption>
+            </figure>
+            {SOLVED.map(({ src, label }) => (
               <figure key={src} className="space-y-1.5">
-                <Image src={src} alt={`The picture cube, ${label.toLowerCase()}`} width={640} height={640} className="rounded-xl" />
+                <Image src={src} alt={`The picture cube solved: ${label.toLowerCase()}`} width={640} height={640} className="rounded-xl" />
                 <figcaption className="text-center text-sm text-muted-foreground">{label}</figcaption>
               </figure>
             ))}
