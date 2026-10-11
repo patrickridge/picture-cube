@@ -6,7 +6,7 @@ Photograph a Rubik's cube that has pictures printed on it instead of colours, an
 
 <table>
   <tr>
-    <td><img src="public/cube-scrambled.jpg" alt="The picture cube scrambled" width="200"></td>
+    <td><img src="public/cube-before.jpg" alt="The picture cube scrambled" width="200"></td>
     <td><img src="public/cube-solved.jpg" alt="The front, solved" width="200"></td>
     <td><img src="public/cube-solved-orange.jpg" alt="The right side, solved" width="200"></td>
     <td><img src="public/cube-solved-purple.jpg" alt="The back, solved" width="200"></td>

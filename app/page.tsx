@@ -50,7 +50,7 @@ export default function Home() {
           </p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { src: "/cube-scrambled.jpg", label: "Scrambled" },
+              { src: "/cube-before.jpg", label: "Scrambled" },
               { src: "/cube-solved.jpg", label: "Solved: front" },
               { src: "/cube-solved-orange.jpg", label: "Solved: right" },
               { src: "/cube-solved-purple.jpg", label: "Solved: back" },
