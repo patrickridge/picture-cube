@@ -4,9 +4,20 @@
 
 Photograph a Rubik's cube that has pictures printed on it instead of colours, and get the moves to solve it, with every centre picture the right way up.
 
+<table>
+  <tr>
+    <td><img src="public/cube-scrambled.jpg" alt="The picture cube scrambled" width="320"></td>
+    <td><img src="public/cube-solved.jpg" alt="The same side solved with this app" width="320"></td>
+  </tr>
+  <tr>
+    <td align="center">Scrambled</td>
+    <td align="center">Solved</td>
+  </tr>
+</table>
+
 ## Why
 
-I was given a promotional cube covered in artwork and couldn't solve it. Ordinary solvers don't help, for two reasons:
+I was given a promotional cube covered in artwork (above) and couldn't solve it. Ordinary solvers don't help, for two reasons:
 
 1. **The tiles don't have colours.** A tile is a fragment of a picture, and many fragments look alike (pale backgrounds, plain areas). Working out which side each tile belongs on is the hard part.
 2. **Centres can be turned the wrong way.** On a colour cube a centre looks the same whichever way it faces. On a picture cube every piece can be in place while a centre is rotated, which spoils the picture. Solving it needs moves that turn the centres too.

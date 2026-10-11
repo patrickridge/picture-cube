@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { CubeSolver } from "@/components/CubeSolver";
@@ -7,7 +8,7 @@ const STEPS = [
   { title: "Photograph", text: "Six photos, one per side. The app cuts each into nine tiles." },
   { title: "Sort", text: "It guesses which side each tile belongs to from its colours, and checks the result is a real cube. You fix anything it got wrong." },
   { title: "Preview", text: "It shows your cube solved, made from your own tiles. You turn each centre until its picture lines up." },
-  { title: "Solve", text: "About 20–25 moves, a few at a time, with a picture after each group so a slip is caught straight away." },
+  { title: "Solve", text: "Usually 20–40 moves, a few at a time, with a picture after each group so a slip is caught straight away." },
 ];
 
 export default function Home() {
@@ -41,6 +42,24 @@ export default function Home() {
         </div>
 
         <CubeSolver />
+
+        <section className="space-y-4 border-t pt-10">
+          <h2 className="text-xl font-semibold">The cube that started it</h2>
+          <p className="max-w-prose text-sm text-muted-foreground">
+            A conference giveaway covered in artwork. Most tiles are pale fragments that could belong to several sides, and with every piece in place the centres were still turned the wrong way. This is the same side before and after.
+          </p>
+          <div className="grid max-w-xl grid-cols-2 gap-3">
+            {[
+              { src: "/cube-scrambled.jpg", label: "Scrambled" },
+              { src: "/cube-solved.jpg", label: "Solved" },
+            ].map(({ src, label }) => (
+              <figure key={src} className="space-y-1.5">
+                <Image src={src} alt={`The picture cube, ${label.toLowerCase()}`} width={640} height={640} className="rounded-xl" />
+                <figcaption className="text-center text-sm text-muted-foreground">{label}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
 
         <section id="how" className="scroll-mt-16 space-y-4 border-t pt-10">
           <h2 className="text-xl font-semibold">How it works</h2>
