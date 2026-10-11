@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/patrickridge/picture-cube/actions/workflows/ci.yml/badge.svg)](https://github.com/patrickridge/picture-cube/actions/workflows/ci.yml)
 
+Live site: https://picture-cube.vercel.app
+
 Photograph a Rubik's cube that has pictures printed on it instead of colours, and get the moves to solve it, with every centre picture the right way up.
 
 **The cube that inspired the idea**, scrambled and then solved:

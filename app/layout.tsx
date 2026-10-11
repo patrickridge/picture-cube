@@ -16,6 +16,7 @@ const title = "Picture cube solver";
 const description = "Photograph a Rubik's cube printed with pictures and get the moves to solve it, with every centre the right way up.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://picture-cube.vercel.app"),
   title,
   description,
   openGraph: { title, description, siteName: title, type: "website", locale: "en_GB" },
