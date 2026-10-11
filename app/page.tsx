@@ -46,12 +46,14 @@ export default function Home() {
         <section className="space-y-4 border-t pt-10">
           <h2 className="text-xl font-semibold">The cube that started it</h2>
           <p className="max-w-prose text-sm text-muted-foreground">
-            A conference giveaway covered in artwork. Most tiles are pale fragments that could belong to several sides, and with every piece in place the centres were still turned the wrong way. This is the same side before and after.
+            A conference giveaway covered in artwork. Most tiles are pale fragments that could belong to several sides, and with every piece in place the centres were still turned the wrong way. Here it is scrambled, then three of its sides once solved.
           </p>
-          <div className="grid max-w-xl grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               { src: "/cube-scrambled.jpg", label: "Scrambled" },
-              { src: "/cube-solved.jpg", label: "Solved" },
+              { src: "/cube-solved.jpg", label: "Solved: front" },
+              { src: "/cube-solved-orange.jpg", label: "Solved: right" },
+              { src: "/cube-solved-purple.jpg", label: "Solved: back" },
             ].map(({ src, label }) => (
               <figure key={src} className="space-y-1.5">
                 <Image src={src} alt={`The picture cube, ${label.toLowerCase()}`} width={640} height={640} className="rounded-xl" />

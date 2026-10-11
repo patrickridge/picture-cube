@@ -6,12 +6,16 @@ Photograph a Rubik's cube that has pictures printed on it instead of colours, an
 
 <table>
   <tr>
-    <td><img src="public/cube-scrambled.jpg" alt="The picture cube scrambled" width="320"></td>
-    <td><img src="public/cube-solved.jpg" alt="The same side solved with this app" width="320"></td>
+    <td><img src="public/cube-scrambled.jpg" alt="The picture cube scrambled" width="200"></td>
+    <td><img src="public/cube-solved.jpg" alt="The front, solved" width="200"></td>
+    <td><img src="public/cube-solved-orange.jpg" alt="The right side, solved" width="200"></td>
+    <td><img src="public/cube-solved-purple.jpg" alt="The back, solved" width="200"></td>
   </tr>
   <tr>
     <td align="center">Scrambled</td>
-    <td align="center">Solved</td>
+    <td align="center">Solved: front</td>
+    <td align="center">Right</td>
+    <td align="center">Back</td>
   </tr>
 </table>
 
@@ -29,6 +33,8 @@ I was given a promotional cube covered in artwork (above) and couldn't solve it.
 **Sorting tiles** (`lib/autosort.ts`). Each centre stays put, so it identifies its side. Tiles are handed out nine to a side by closest colour match to that side's tiles so far, and the hand-out is repeated a few times. You correct any it gets wrong by tapping.
 
 **Checking it's a real cube** (`lib/pieces.ts`). Most misreads produce a cube that can't exist, and the app says why: a side with 10 tiles, a corner with two tiles from opposite sides, a piece that appears twice, or a corner that would need twisting in place. If changing one tile (or swapping two) would make it valid, it offers that change, which is almost always the right one.
+
+<img src="docs/screenshot.jpg" alt="The centre step: the example cube shown solved from its own tiles, with the front and back centres still turned the wrong way" width="640">
 
 **Previewing the solved cube** (`lib/cube.ts`). The cube is modelled as 54 stickers, each with a position, a facing and an "up" direction, turned with 3D rotations. That tracks which way every tile photo ends up facing, so the app can draw your cube solved from your own photos. You turn each centre in the preview until its picture lines up.
 
