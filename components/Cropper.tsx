@@ -3,91 +3,99 @@
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { centredSquare, type Quad, squareToQuad } from "@/lib/perspective";
 import { cutTiles, type Tile } from "@/lib/tiles";
 
 type Props = { url: string; onDone: (tiles: Tile[]) => void; onCancel: () => void };
 
-/** Shows a photo with a square to drag over the face, then cuts it into nine tiles. */
+/** Shows a photo with a grid whose four corners you drag onto the face's corners, then cuts it into nine straightened tiles. */
 export function Cropper({ url, onDone, onCancel }: Props) {
   const image = useRef<HTMLImageElement>(null);
-  const [natural, setNatural] = useState<{ w: number; h: number }>();
-  // Square in image pixels.
-  const [square, setSquare] = useState({ x: 0, y: 0, size: 0 });
-  const drag = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
+  const svg = useRef<SVGSVGElement>(null);
+  const [size, setSize] = useState<{ w: number; h: number }>();
+  const [quad, setQuad] = useState<Quad>();
+  const dragging = useRef<number | null>(null);
 
   const onLoad = () => {
     const img = image.current!;
-    const w = img.naturalWidth;
-    const h = img.naturalHeight;
-    const size = Math.min(w, h) * 0.7;
-    setNatural({ w, h });
-    setSquare({ x: (w - size) / 2, y: (h - size) / 2, size });
+    setSize({ w: img.naturalWidth, h: img.naturalHeight });
+    setQuad(centredSquare(img.naturalWidth, img.naturalHeight));
   };
 
-  const scale = () => (natural && image.current ? natural.w / image.current.clientWidth : 1);
-  const clamp = (s: typeof square) => ({
-    size: s.size,
-    x: Math.min(Math.max(s.x, 0), natural!.w - s.size),
-    y: Math.min(Math.max(s.y, 0), natural!.h - s.size),
-  });
-
-  const setSize = (fraction: number) => {
-    const size = Math.min(natural!.w, natural!.h) * fraction;
-    const cx = square.x + square.size / 2;
-    const cy = square.y + square.size / 2;
-    setSquare(clamp({ size, x: cx - size / 2, y: cy - size / 2 }));
+  /** Pointer position in the photo's own pixels. */
+  const toPhoto = (e: React.PointerEvent) => {
+    const box = svg.current!.getBoundingClientRect();
+    return {
+      x: Math.min(size!.w, Math.max(0, ((e.clientX - box.left) / box.width) * size!.w)),
+      y: Math.min(size!.h, Math.max(0, ((e.clientY - box.top) / box.height) * size!.h)),
+    };
   };
 
-  const pct = (v: number, of: number) => `${(v / of) * 100}%`;
+  // Grid lines through the perspective map, so they follow the tiles in a tilted photo.
+  const lines: string[] = [];
+  if (quad) {
+    const map = squareToQuad(quad);
+    for (const t of [1 / 3, 2 / 3]) {
+      const [a, b, c, d] = [map(t, 0), map(t, 1), map(0, t), map(1, t)];
+      lines.push(`M${a.x} ${a.y}L${b.x} ${b.y}`, `M${c.x} ${c.y}L${d.x} ${d.y}`);
+    }
+  }
+  const handle = size ? Math.min(size.w, size.h) * 0.035 : 0;
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Drag the square so its grid lines sit on the lines between tiles. Use the slider to resize it.</p>
+      <p className="text-sm text-muted-foreground">Drag the four corners onto the corners of the face. The grid follows, so check its lines sit on the gaps between tiles.</p>
       <div className="relative mx-auto w-full max-w-md touch-none select-none overflow-hidden rounded-lg bg-neutral-900">
         {/* eslint-disable-next-line @next/next/no-img-element -- a local photo, not something to optimise */}
         <img ref={image} src={url} alt="Your photo" onLoad={onLoad} className="block w-full" draggable={false} />
-        {natural && (
-          <div
-            className="absolute cursor-move border-2 border-white shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"
-            style={{ left: pct(square.x, natural.w), top: pct(square.y, natural.h), width: pct(square.size, natural.w), height: pct(square.size, natural.h) }}
-            onPointerDown={(e) => {
-              e.currentTarget.setPointerCapture(e.pointerId);
-              drag.current = { px: e.clientX, py: e.clientY, x: square.x, y: square.y };
-            }}
+        {size && quad && (
+          <svg
+            ref={svg}
+            viewBox={`0 0 ${size.w} ${size.h}`}
+            preserveAspectRatio="none"
+            className="absolute inset-0 size-full"
             onPointerMove={(e) => {
-              if (!drag.current) return;
-              const k = scale();
-              setSquare(clamp({ size: square.size, x: drag.current.x + (e.clientX - drag.current.px) * k, y: drag.current.y + (e.clientY - drag.current.py) * k }));
+              const corner = dragging.current;
+              if (corner === null) return;
+              const p = toPhoto(e);
+              setQuad((q) => q!.map((c, i) => (i === corner ? p : c)) as Quad);
             }}
-            onPointerUp={() => (drag.current = null)}
+            onPointerUp={() => (dragging.current = null)}
+            onPointerLeave={() => (dragging.current = null)}
           >
-            <div className="grid size-full grid-cols-3 grid-rows-3">
-              {Array.from({ length: 9 }, (_, i) => (
-                <span key={i} className="border border-white/70" />
-              ))}
-            </div>
-          </div>
+            <path d={`M0 0H${size.w}V${size.h}H0Z M${quad.map((p) => `${p.x} ${p.y}`).join("L")}Z`} fill="rgba(0,0,0,0.45)" fillRule="evenodd" />
+            <path d={`M${quad.map((p) => `${p.x} ${p.y}`).join("L")}Z`} fill="none" stroke="white" strokeWidth={handle * 0.12} />
+            <path d={lines.join("")} fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth={handle * 0.08} />
+            {quad.map((p, i) => (
+              <circle
+                key={i}
+                cx={p.x}
+                cy={p.y}
+                r={handle}
+                fill="rgba(37,99,235,0.85)"
+                stroke="white"
+                strokeWidth={handle * 0.15}
+                className="cursor-grab"
+                aria-label={["Top left corner", "Top right corner", "Bottom right corner", "Bottom left corner"][i]}
+                onPointerDown={(e) => {
+                  dragging.current = i;
+                  try {
+                    (e.target as Element).setPointerCapture(e.pointerId); // keep the drag if the finger leaves the handle
+                  } catch {}
+                }}
+              />
+            ))}
+          </svg>
         )}
       </div>
-      {natural && (
-        <label className="mx-auto flex max-w-md items-center gap-3 text-sm">
-          <span className="text-muted-foreground">Size</span>
-          <input
-            type="range"
-            min={0.2}
-            max={1}
-            step={0.01}
-            value={square.size / Math.min(natural.w, natural.h)}
-            onChange={(e) => setSize(Number(e.target.value))}
-            className="flex-1 accent-primary"
-          />
-        </label>
-      )}
       <div className="flex justify-center gap-2">
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button disabled={!natural} onClick={() => onDone(cutTiles(image.current!, square))}>
+        <Button variant="ghost" disabled={!size} onClick={() => setQuad(centredSquare(size!.w, size!.h))}>
+          Reset
+        </Button>
+        <Button disabled={!quad} onClick={() => onDone(cutTiles(image.current!, quad!))}>
           Use this face
         </Button>
       </div>

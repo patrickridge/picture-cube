@@ -31,7 +31,7 @@ I couldn't solve the cube above, and ordinary solvers don't help with it, for tw
 
 ## How it works
 
-**Photos to tiles.** You take six photos in a set order (front, right, back, left, top, bottom) and line a square up with each face. The app cuts each face into nine tiles and records each tile's colour mix as a 64-bin histogram.
+**Photos to tiles.** You take six photos in a set order (front, right, back, left, top, bottom) and drag a grid's four corners onto each face. A projective transform (`lib/perspective.ts`) maps a square onto those corners, so each of the nine tiles is read back square even from a photo taken at an angle, and each tile gets a colour fingerprint.
 
 **Sorting tiles** (`lib/autosort.ts`). Sorting tiles one at a time by colour fails on picture cubes: many tiles are pale fragments that could belong to several sides, and on a real cube that approach got 30 of 54 right. So the app sorts whole pieces. Each corner slot must hold one of the eight real corners (in one of three twists), and each edge one of the twelve real edges (one of two flips), each used once. Picking which piece goes where is an assignment problem, solved exactly with the Hungarian algorithm, where a piece's cost in a slot is how badly its tiles' colours fit the sides they'd belong to. The answer is always a real set of pieces; any twist, flip or swap the cube's rules forbid is then fixed at the smallest cost. Each tile's colour is a fingerprint of three histograms (colour, the hue of its coloured pixels, brightness). On photos of a real picture cube (`test/fixtures/real-cube.json`) this gets all 54 tiles right. You can still tap any tile to change it.
 
@@ -79,7 +79,8 @@ lib/pieces.ts            Is this a real cube? Problems and one-tile fixes
 lib/autosort.ts          First guess at each tile's side: pieces matched to slots by colour
 lib/solve.ts             Moves that solve the pieces and turn the centres right
 lib/centre-fixes.json    Centre-only sequences for every pattern (generated)
-lib/tiles.ts             Cutting a photo into tiles; colour histograms
+lib/tiles.ts             Cutting a face into straightened tiles; colour fingerprints
+lib/perspective.ts       Mapping a square onto a tilted face
 lib/demo.ts              The example cube
 components/              The four steps: photos, sorting, centres, moves
 scripts/                 Builds the centre-fix table
@@ -89,7 +90,6 @@ Built with Next.js, TypeScript, Tailwind CSS and shadcn/ui.
 
 ## Limitations
 
-- Photos need to be fairly straight on. The square crop doesn't correct for perspective.
 - Sorting by colour struggles when two sides share a palette. The checks catch most mistakes, but some tiles may need tapping by hand.
 - Solutions are around 20–40 moves depending on how many centres need turning, not the shortest possible.
 

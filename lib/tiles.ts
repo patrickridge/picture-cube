@@ -1,6 +1,8 @@
 // Cuts a photo of one face into nine tiles, and describes each tile by its colours so
 // tiles from the same picture can be grouped.
 
+import { type Quad, squareToQuad } from "./perspective";
+
 export type Tile = { image: string; colours: number[] };
 
 const TILE_PX = 160;
@@ -9,22 +11,48 @@ const BINS = 4; // per channel, so 64 colour bins
 /** Fraction of each tile trimmed off every edge, to skip the black plastic between tiles. */
 const INSET = 0.08;
 
-export type Square = { x: number; y: number; size: number };
+/**
+ * The nine tiles of the face whose corners are `quad` (in the source image's pixels), read left to
+ * right, top to bottom. Each tile is straightened: its pixels are sampled through the projective
+ * map from a square onto the quad, so photos taken at an angle still give square tiles.
+ */
+export function cutTiles(source: HTMLImageElement, quad: Quad): Tile[] {
+  // Work on a copy no bigger than needed: the face rarely needs more than ~1,500 pixels across.
+  const scale = Math.min(1, 1600 / Math.max(source.naturalWidth, source.naturalHeight));
+  const width = Math.round(source.naturalWidth * scale);
+  const height = Math.round(source.naturalHeight * scale);
+  const photo = document.createElement("canvas");
+  photo.width = width;
+  photo.height = height;
+  const pctx = photo.getContext("2d", { willReadFrequently: true })!;
+  pctx.drawImage(source, 0, 0, width, height);
+  const pixels = pctx.getImageData(0, 0, width, height).data;
+  const map = squareToQuad(quad.map((p) => ({ x: p.x * scale, y: p.y * scale })) as Quad);
 
-/** The nine tiles inside `square` (source pixels) of `source`, read left to right, top to bottom. */
-export function cutTiles(source: CanvasImageSource, square: Square): Tile[] {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = TILE_PX;
   const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
-  const step = square.size / 3;
+  const out = ctx.createImageData(TILE_PX, TILE_PX);
   const tiles: Tile[] = [];
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 3; col++) {
-      const sx = square.x + col * step + step * INSET;
-      const sy = square.y + row * step + step * INSET;
-      const s = step * (1 - 2 * INSET);
-      ctx.drawImage(source, sx, sy, s, s, 0, 0, TILE_PX, TILE_PX);
-      tiles.push({ image: canvas.toDataURL("image/jpeg", 0.85), colours: fingerprint(ctx.getImageData(0, 0, TILE_PX, TILE_PX).data) });
+      for (let j = 0; j < TILE_PX; j++) {
+        for (let i = 0; i < TILE_PX; i++) {
+          const u = (col + INSET + ((1 - 2 * INSET) * (i + 0.5)) / TILE_PX) / 3;
+          const v = (row + INSET + ((1 - 2 * INSET) * (j + 0.5)) / TILE_PX) / 3;
+          const { x, y } = map(u, v);
+          const sx = Math.min(width - 1, Math.max(0, Math.round(x)));
+          const sy = Math.min(height - 1, Math.max(0, Math.round(y)));
+          const from = (sy * width + sx) * 4;
+          const to = (j * TILE_PX + i) * 4;
+          out.data[to] = pixels[from];
+          out.data[to + 1] = pixels[from + 1];
+          out.data[to + 2] = pixels[from + 2];
+          out.data[to + 3] = 255;
+        }
+      }
+      ctx.putImageData(out, 0, 0);
+      tiles.push({ image: canvas.toDataURL("image/jpeg", 0.85), colours: fingerprint(out.data) });
     }
   }
   return tiles;

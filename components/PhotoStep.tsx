@@ -42,7 +42,7 @@ export function PhotoStep({ tiles, onFace, onNext }: Props) {
       <div>
         <h2 className="text-lg font-semibold">Photograph each side</h2>
         <p className="text-sm text-muted-foreground">
-          Six photos in good light. Hold the camera level with the side you&apos;re photographing, so the top of the cube is out of shot. Turn the whole cube between photos, never a single layer.
+          Six photos in good light, as straight on as you can. Angled is fine too: you&apos;ll drag the grid&apos;s corners onto the face. Turn the whole cube between photos, never a single layer.
         </p>
       </div>
       <ol className="grid gap-3 sm:grid-cols-2">
