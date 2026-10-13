@@ -2,7 +2,7 @@
 // into tiles and scrambled with the same sticker model the solver uses.
 
 import { applyMoves, type Move, solvedState } from "./cube";
-import { histogram, type Tile } from "./tiles";
+import { fingerprint, type Tile } from "./tiles";
 
 const PICTURES = [
   { word: "TOP", from: "#fde68a", to: "#f59e0b", ink: "#78350f" },
@@ -68,6 +68,6 @@ export function demoTiles(): Tile[] {
     tctx.rotate((turns * Math.PI) / 2);
     tctx.drawImage(solvedTiles[home], -t / 2, -t / 2);
     tctx.restore();
-    return { image: tile.toDataURL("image/jpeg", 0.85), colours: histogram(tctx.getImageData(0, 0, t, t).data) };
+    return { image: tile.toDataURL("image/jpeg", 0.85), colours: fingerprint(tctx.getImageData(0, 0, t, t).data) };
   });
 }

@@ -24,24 +24,44 @@ export function cutTiles(source: CanvasImageSource, square: Square): Tile[] {
       const sy = square.y + row * step + step * INSET;
       const s = step * (1 - 2 * INSET);
       ctx.drawImage(source, sx, sy, s, s, 0, 0, TILE_PX, TILE_PX);
-      tiles.push({ image: canvas.toDataURL("image/jpeg", 0.85), colours: histogram(ctx.getImageData(0, 0, TILE_PX, TILE_PX).data) });
+      tiles.push({ image: canvas.toDataURL("image/jpeg", 0.85), colours: fingerprint(ctx.getImageData(0, 0, TILE_PX, TILE_PX).data) });
     }
   }
   return tiles;
 }
 
-/** Share of a tile's pixels in each colour bin. */
-export function histogram(pixels: Uint8ClampedArray): number[] {
-  const counts = new Array(BINS ** 3).fill(0);
-  const width = BINS / 256;
-  for (let i = 0; i < pixels.length; i += 4) {
-    const r = Math.floor(pixels[i] * width);
-    const g = Math.floor(pixels[i + 1] * width);
-    const b = Math.floor(pixels[i + 2] * width);
-    counts[(r * BINS + g) * BINS + b]++;
+/**
+ * A tile's colour fingerprint, three histograms side by side:
+ * - 60%: share of pixels in each of 64 colour bins (4 levels each of red, green and blue);
+ * - 30%: hue of the coloured pixels (12 bins), plus the share that are near-grey, so a pale tile
+ *   with a tint of lilac differs from one with a tint of yellow;
+ * - 10%: brightness (8 bins).
+ * The weights were chosen on photos of a real picture cube, where pale tiles from different sides
+ * are the hard cases (test/fixtures/real-cube.json).
+ */
+export function fingerprint(pixels: ArrayLike<number>, stride = 4): number[] {
+  const n = pixels.length / stride;
+  const rgb = new Array(BINS ** 3).fill(0);
+  const hue = new Array(12).fill(0);
+  const bright = new Array(8).fill(0);
+  let grey = 0;
+  for (let i = 0; i < pixels.length; i += stride) {
+    const r = pixels[i];
+    const g = pixels[i + 1];
+    const b = pixels[i + 2];
+    rgb[(Math.floor((r * BINS) / 256) * BINS + Math.floor((g * BINS) / 256)) * BINS + Math.floor((b * BINS) / 256)] += 0.6 / n;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const value = max / 255;
+    bright[Math.min(7, Math.floor(value * 8))] += 0.1 / n;
+    if (max && (max - min) / max > 0.12 && value > 0.15) {
+      const d = max - min;
+      let h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      if (h < 0) h += 6;
+      hue[Math.min(11, Math.floor(h * 2))] += 0.3 / n;
+    } else grey += 0.3 / n;
   }
-  const total = pixels.length / 4;
-  return counts.map((c) => c / total);
+  return [...rgb, ...hue, grey, ...bright];
 }
 
 /** 0 for identical colour mixes, 1 for nothing in common. */

@@ -29,7 +29,7 @@ const zero = () => ({ U: 0, R: 0, F: 0, D: 0, L: 0, B: 0 });
 const no = () => ({ U: false, R: false, F: false, D: false, L: false, B: false });
 const startLabels = (): Face[] => Array.from({ length: 54 }, (_, i) => faceOf(i));
 
-const SAVE_KEY = "picture-cube";
+const SAVE_KEY = "picture-cube-v2"; // bumped when the saved tile format changes
 type Saved = { tiles: (Tile | null)[]; labels: Face[] };
 
 export function CubeSolver() {

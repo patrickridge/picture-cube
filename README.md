@@ -33,7 +33,7 @@ I couldn't solve the cube above, and ordinary solvers don't help with it, for tw
 
 **Photos to tiles.** You take six photos in a set order (front, right, back, left, top, bottom) and line a square up with each face. The app cuts each face into nine tiles and records each tile's colour mix as a 64-bin histogram.
 
-**Sorting tiles** (`lib/autosort.ts`). Each centre stays put, so it identifies its side. Tiles are handed out nine to a side by closest colour match to that side's tiles so far, and the hand-out is repeated a few times. You correct any it gets wrong by tapping.
+**Sorting tiles** (`lib/autosort.ts`). Sorting tiles one at a time by colour fails on picture cubes: many tiles are pale fragments that could belong to several sides, and on a real cube that approach got 30 of 54 right. So the app sorts whole pieces. Each corner slot must hold one of the eight real corners (in one of three twists), and each edge one of the twelve real edges (one of two flips), each used once. Picking which piece goes where is an assignment problem, solved exactly with the Hungarian algorithm, where a piece's cost in a slot is how badly its tiles' colours fit the sides they'd belong to. The answer is always a real set of pieces; any twist, flip or swap the cube's rules forbid is then fixed at the smallest cost. Each tile's colour is a fingerprint of three histograms (colour, the hue of its coloured pixels, brightness). On photos of a real picture cube (`test/fixtures/real-cube.json`) this gets all 54 tiles right. You can still tap any tile to change it.
 
 **Checking it's a real cube** (`lib/pieces.ts`). Most misreads produce a cube that can't exist, and the app says why: a side with 10 tiles, a corner with two tiles from opposite sides, a piece that appears twice, or a corner that would need twisting in place. If changing one tile (or swapping two) would make it valid, it offers that change, which is almost always the right one.
 
@@ -76,7 +76,7 @@ GitHub Actions runs all four on every push. The tests include real readings from
 ```
 lib/cube.ts              Sticker model: moves, which way each tile faces, centre turns
 lib/pieces.ts            Is this a real cube? Problems and one-tile fixes
-lib/autosort.ts          First guess at each tile's side from its colours
+lib/autosort.ts          First guess at each tile's side: pieces matched to slots by colour
 lib/solve.ts             Moves that solve the pieces and turn the centres right
 lib/centre-fixes.json    Centre-only sequences for every pattern (generated)
 lib/tiles.ts             Cutting a photo into tiles; colour histograms
